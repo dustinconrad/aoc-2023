@@ -2,3 +2,5 @@
 .idea
 build
 src/**/*.txt
+resources/**/*.txt
+testResources/**/*.txt
