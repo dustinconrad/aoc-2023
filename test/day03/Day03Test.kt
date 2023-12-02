@@ -1,9 +1,9 @@
-package day02
+package day03
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class Day02Test {
+class Day03Test {
 
     @Test
     fun testPart1() {
