@@ -1,5 +1,6 @@
 package day03
 
+import overlaps
 import readResourceAsBufferedReader
 import kotlin.math.max
 import kotlin.math.min
@@ -86,8 +87,6 @@ data class EngineSchematic(
             .map { it[0] to it[1] }
 
 }
-
-fun IntRange.overlaps(other: IntRange): Boolean = !(this.first > other.last || this.last < other.first)
 
 fun part1(input: List<String>): Int {
     val engine = EngineSchematic(input)

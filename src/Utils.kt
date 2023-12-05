@@ -50,3 +50,7 @@ fun <T> Collection<Iterable<T>>.getCartesianProduct(): Set<List<T>> =
     else drop(1).fold(first().map(::listOf)) { acc, iterable ->
         acc.flatMap { list -> iterable.map(list::plus) }
     }.toSet()
+
+fun IntRange.overlaps(other: IntRange): Boolean = !(this.first > other.last || this.last < other.first)
+
+fun LongRange.overlaps(other: LongRange): Boolean = !(this.first > other.last || this.last < other.first)
