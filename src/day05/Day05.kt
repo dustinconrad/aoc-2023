@@ -16,9 +16,10 @@ fun part1(input: List<String>): Long {
     val byEmpty = input.byEmptyLines();
     val seeds = byEmpty.first().split(" ").drop(1).map { it.toLong() }
     val almanac = Almanac.parse(byEmpty.drop(1))
-    return seeds.minOf {
-        almanac.lookup(it)
-    }
+    return seedOutput(
+        seeds.map { it..it },
+        almanac
+    )
 }
 
 fun part2(input: List<String>): Long {
@@ -28,9 +29,13 @@ fun part2(input: List<String>): Long {
     for (i in 0 until seeds.size step 2) {
         seedPairs.add(seeds[i] to seeds[i + 1])
     }
-    val seedRanges = seedPairs.map { LongRange(it.first, it.first + it.second) }
+    val seedRanges = seedPairs.map { LongRange(it.first, it.first + it.second - 1) }
     val almanac = Almanac.parse(byEmpty.drop(1))
 
+    return seedOutput(seedRanges, almanac)
+}
+
+fun seedOutput(seedRanges: List<LongRange>, almanac: Almanac): Long {
     return seedRanges.flatMap {
         println()
         almanac.lookup(it)
@@ -40,14 +45,10 @@ fun part2(input: List<String>): Long {
 
 data class Almanac(val mappers: List<Mapper>) {
 
-    fun lookup(seed: Long): Long = mappers.fold(seed) { acc, mapper ->
-        mapper.lookup(acc)
-    }
-
     fun lookup(seed: LongRange): Set<LongRange> {
         return mappers.fold(mutableSetOf(seed)) { acc, mapper ->
             val result = acc.flatMap { mapper.lookup(it) }.toSet()
-            println("result: $result from $acc" )
+            println("$acc -> $result")
             result.toMutableSet()
         }
     }
@@ -65,12 +66,12 @@ data class Mapper(
     val rules: List<MappingRule>
 ) {
 
-    fun lookup(v: Long): Long {
-        return rules.firstNotNullOfOrNull { it.map(v) } ?: v
-    }
-
     fun lookup(v: LongRange): List<LongRange> {
-        val lookups = rules.flatMap { it.map(v) }
+        val lookupResults = rules.map{ it to it.map(v) }
+            .filter { it.second.isNotEmpty() }
+            .toMap()
+        println("$v: $lookupResults")
+        val lookups = lookupResults.flatMap { it.value }
         return if (lookups.isEmpty()) {
             listOf(v)
         } else {
