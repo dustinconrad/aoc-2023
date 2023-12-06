@@ -1,6 +1,7 @@
 package day05
 
 import byEmptyLines
+import merge
 import overlaps
 import readResourceAsBufferedReader
 import kotlin.math.max
@@ -37,7 +38,6 @@ fun part2(input: List<String>): Long {
 
 fun seedOutput(seedRanges: List<LongRange>, almanac: Almanac): Long {
     return seedRanges.flatMap {
-        println()
         almanac.lookup(it)
     }
         .minOf { it.first }
@@ -48,7 +48,6 @@ data class Almanac(val mappers: List<Mapper>) {
     fun lookup(seed: LongRange): Set<LongRange> {
         return mappers.fold(mutableSetOf(seed)) { acc, mapper ->
             val result = acc.flatMap { mapper.lookup(it) }.toSet()
-            println("$acc -> $result")
             result.toMutableSet()
         }
     }
@@ -67,16 +66,28 @@ data class Mapper(
 ) {
 
     fun lookup(v: LongRange): List<LongRange> {
-        val lookupResults = rules.map{ it to it.map(v) }
-            .filter { it.second.isNotEmpty() }
-            .toMap()
-        println("$v: $lookupResults")
-        val lookups = lookupResults.flatMap { it.value }
-        return if (lookups.isEmpty()) {
-            listOf(v)
-        } else {
-            lookups
+        val overlappingRules = rules.mapNotNull { it.map(v) }
+        if (overlappingRules.isEmpty()) {
+//            println("$name: $v -> $v")
+            return listOf(v)
         }
+        val remapped = overlappingRules.map { it.second }.sortedBy { it.first }
+        val usedRange = overlappingRules.map { it.first }
+        val mergedUsedRanged = usedRange.merge().sortedBy { it.first }
+
+        val result = remapped.toMutableList()
+
+        var curr = v
+
+        for(r in mergedUsedRanged) {
+            val newRange = LongRange(curr.first, r.first - 1)
+            if (!newRange.isEmpty()) {
+                result.add(newRange)
+            }
+            curr = LongRange(r.last + 1, curr.last)
+        }
+
+        return result.sortedBy { it.first }
     }
 
     companion object {
@@ -85,36 +96,22 @@ data class Mapper(
             val id = lines.first().split(" ").first()
             val rules = lines.drop(1)
                 .map { MappingRule.parse(it) }
-            return Mapper(id, rules)
+            return Mapper(id, rules.sortedBy { it.src })
         }
     }
 }
 
 data class MappingRule(val dst: Long, val src: Long, val l: Long) {
 
-    private val srcRange = LongRange(src, src + l - 1)
+    val srcRange = LongRange(src, src + l - 1)
 
-    fun map(i: Long): Long? {
-        return if (srcRange.contains(i)) {
-            dst + (i - srcRange.first)
+    fun map(i: LongRange): Pair<LongRange, LongRange>? {
+        return if(i.overlaps(srcRange)) {
+            val middle = LongRange(max(i.first, srcRange.first), min(i.last, srcRange.last))
+            return middle to
+                    LongRange(middle.first + dst - src, middle.last + dst - src)
         } else {
             null
-        }
-    }
-
-    fun map(i: LongRange): List<LongRange> {
-        return if(i.overlaps(srcRange)) {
-            val left = LongRange(i.first, max(i.first, srcRange.first) - 1)
-            val middle = LongRange(max(i.first, srcRange.first), min(i.last, srcRange.last))
-            val right = LongRange(min(i.last, srcRange.last) + 1, i.last)
-
-            return listOf(
-                left,
-                LongRange(middle.first + dst - src, middle.last + dst - src),
-                right
-            ).filter { !it.isEmpty() }
-        } else {
-            emptyList()
         }
     }
 

@@ -3,6 +3,8 @@ import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.readLines
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Reads lines from the given input txt file.
@@ -54,3 +56,32 @@ fun <T> Collection<Iterable<T>>.getCartesianProduct(): Set<List<T>> =
 fun IntRange.overlaps(other: IntRange): Boolean = !(this.first > other.last || this.last < other.first)
 
 fun LongRange.overlaps(other: LongRange): Boolean = !(this.first > other.last || this.last < other.first)
+
+fun LongRange.merge(other: LongRange): LongRange = if (this.overlaps(other)) {
+    LongRange(min(this.first, other.first), max(this.last, other.last))
+} else {
+    throw IllegalStateException("$this does not overlap $other")
+}
+
+fun List<LongRange>.merge(): List<LongRange>  {
+    if (this.size <=  1)  {
+        return this
+    }
+
+    val result = mutableListOf<LongRange>()
+    val workingCopy = this.sortedBy { it.first }.toMutableList()
+    var curr = workingCopy.removeFirst()
+    while (workingCopy.isNotEmpty()) {
+        val next = workingCopy.removeFirst()
+        if (curr.overlaps(next)) {
+            curr = curr.merge(next)
+        } else {
+            result.add(curr)
+            curr = next
+        }
+    }
+
+    result.add(curr)
+
+    return result
+}

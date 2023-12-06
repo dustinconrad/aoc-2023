@@ -88,5 +88,19 @@ class Day05Test {
 
         assertEquals(46, part2(input))
     }
+
+    @Test
+    fun testPart2EdgeCase() {
+        val input = """
+            seeds: 46 11
+
+            humidity-to-location map:
+            60 56 37
+            56 93 4
+        """.trimIndent()
+            .lines()
+
+        assertEquals(46, part2(input))
+    }
     
 }
