@@ -5,6 +5,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.readLines
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sqrt
 
 /**
  * Reads lines from the given input txt file.
@@ -84,4 +85,12 @@ fun List<LongRange>.merge(): List<LongRange>  {
     result.add(curr)
 
     return result
+}
+
+fun quadratic(a: Long, b: Long, c: Long): List<Double> {
+    val r = sqrt((b * b - 4 * a * c).toDouble())
+    val minus = (-b - r) / (2 * a)
+    val plus = (-b + r) / (2 * a)
+
+    return listOf(minus, plus).sorted()
 }
