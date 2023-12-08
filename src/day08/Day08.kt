@@ -11,23 +11,43 @@ fun main() {
 
 data class DesertMap(val nodes: Map<String, Pair<String, String>>) {
 
-    fun traverse(instr: String): List<String> {
-        val endlessInstructions = sequence {
-            while (true) {
-                yieldAll(instr.asSequence())
-            }
+    fun endlessInstructions(instr: String) = sequence {
+        while (true) {
+            yieldAll(instr.asSequence())
         }
+    }
+
+    fun move(acc: String, c: Char): String {
+        val next = nodes[acc]!!
+        return when(c) {
+            'R' -> next.second
+            'L' -> next.first
+            else -> throw IllegalArgumentException("Unknown direction $c")
+        }
+    }
+
+    fun traverse(instr: String): List<String> {
+        val endlessInstructions= endlessInstructions(instr)
 
         val visits = endlessInstructions.scan("AAA") { acc, c ->
-            val next = nodes[acc]!!
-            when(c) {
-                'R' -> next.second
-                'L' -> next.first
-                else -> throw IllegalArgumentException("Unknown direction $c")
-            }
+            move(acc, c)
         }
 
         val steps = visits.takeWhile { it != "ZZZ" }.toList()
+
+        return steps
+    }
+
+    fun traverse2(instr: String): List<List<String>> {
+        val endlessInstructions= endlessInstructions(instr)
+
+        val startingNodes = nodes.keys.filter { it.endsWith("A") }
+
+        val visits = endlessInstructions.scan(startingNodes) { acc, c ->
+            acc.map { move(it, c) }
+        }
+
+        val steps = visits.takeWhile { acc -> acc.any { !it.endsWith("Z") } }.toList()
 
         return steps
     }
@@ -59,5 +79,7 @@ fun part1(input: List<String>): Int {
 }
 
 fun part2(input: List<String>): Int {
-    return 0
+    val (directions, map) = input.byEmptyLines()
+    val desertMap = DesertMap.parse(map)
+    return desertMap.traverse2(directions).size
 }
