@@ -1,6 +1,7 @@
 package day08
 
 import byEmptyLines
+import lcm
 import readResourceAsBufferedReader
 
 
@@ -8,6 +9,12 @@ fun main() {
     println("part 1: ${part1(readResourceAsBufferedReader("8_1.txt").readLines())}")
     println("part 2: ${part2(readResourceAsBufferedReader("8_1.txt").readLines())}")
 }
+
+data class CycleInfo(
+    val offset: Int,
+    val length: Int,
+    val end: String
+)
 
 data class DesertMap(val nodes: Map<String, Pair<String, String>>) {
 
@@ -26,30 +33,41 @@ data class DesertMap(val nodes: Map<String, Pair<String, String>>) {
         }
     }
 
-    fun traverse(instr: String): List<String> {
+    fun traverse(instr: String, start: String): Sequence<String> {
         val endlessInstructions= endlessInstructions(instr)
 
-        val visits = endlessInstructions.scan("AAA") { acc, c ->
+        return endlessInstructions.scan(start) { acc, c ->
             move(acc, c)
         }
-
-        val steps = visits.takeWhile { it != "ZZZ" }.toList()
-
-        return steps
     }
 
-    fun traverse2(instr: String): List<List<String>> {
-        val endlessInstructions= endlessInstructions(instr)
+    fun traverse1(instr: String): List<String> {
+        return traverse(instr, "AAA").takeWhile { it != "ZZZ" }.toList()
+    }
 
-        val startingNodes = nodes.keys.filter { it.endsWith("A") }
+    fun cycle(instr: String, start: String, end: (String) -> Boolean): CycleInfo {
+        val seen = mutableMapOf<String, Int>()
+        var curr = start
+        var counter = 0
 
-        val visits = endlessInstructions.scan(startingNodes) { acc, c ->
-            acc.map { move(it, c) }
+        while(!end(curr) || !seen.containsKey(curr)) {
+            if (end(curr)) {
+                seen[curr] = counter
+            }
+            val dir = instr[counter % instr.length]
+            curr = move(curr, dir)
+            counter++
         }
 
-        val steps = visits.takeWhile { acc -> acc.any { !it.endsWith("Z") } }.toList()
+        return CycleInfo(seen[curr]!!, counter - seen[curr]!!, curr)
+    }
 
-        return steps
+    fun traverse2(instr: String): Long {
+        val startingNodes = nodes.keys.filter { it.endsWith("A") }
+        val cycles = startingNodes.map { cycle(instr, it) { inner -> inner.endsWith("Z") } }
+        // offsets == cycle length
+        val lengths = cycles.map { it.length.toLong() }.toTypedArray().toLongArray()
+        return lcm(*lengths)
     }
 
     companion object {
@@ -75,11 +93,12 @@ data class DesertMap(val nodes: Map<String, Pair<String, String>>) {
 fun part1(input: List<String>): Int {
     val (directions, map) = input.byEmptyLines()
     val desertMap = DesertMap.parse(map)
-    return desertMap.traverse(directions).size
+    return desertMap.traverse1(directions).size
 }
 
-fun part2(input: List<String>): Int {
+fun part2(input: List<String>): Any {
     val (directions, map) = input.byEmptyLines()
     val desertMap = DesertMap.parse(map)
-    return desertMap.traverse2(directions).size
+
+    return desertMap.traverse2(directions)
 }
