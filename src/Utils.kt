@@ -136,3 +136,7 @@ fun lcm(vararg numbers: Long): Long {
     val result = (a * b) / gcd;
     return numbers.drop(2).fold(result) { acc, n -> lcm(acc, n) }
 }
+
+fun Pair<Int, Int>.addVec(vec: Pair<Int, Int>): Pair<Int, Int> {
+    return this.first + vec.first to this.second + vec.second
+}
