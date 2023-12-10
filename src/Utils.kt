@@ -140,3 +140,7 @@ fun lcm(vararg numbers: Long): Long {
 fun Pair<Int, Int>.addVec(vec: Pair<Int, Int>): Pair<Int, Int> {
     return this.first + vec.first to this.second + vec.second
 }
+
+fun Pair<Int, Int>.subtract(other: Pair<Int, Int>): Pair<Int, Int> {
+    return this.first - other.first to this.second - other.second
+}
