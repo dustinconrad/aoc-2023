@@ -25,21 +25,41 @@ class Day11Test {
     }
 
     @Test
-    fun testPart2() {
+    fun testPart2_1() {
         val input = """
+            ...#......
+            .......#..
+            #.........
+            ..........
+            ......#...
+            .#........
+            .........#
+            ..........
+            .......#..
+            #...#.....
         """.trimIndent()
             .lines()
 
-        assertEquals(281, part2(input))
+        assertEquals(374, part2(input,2))
     }
 
     @Test
-    fun testPart2EdgeCase() {
+    fun testPart2() {
         val input = """
-            trknlxnv43zxlrqjtwonect
+            ...#......
+            .......#..
+            #.........
+            ..........
+            ......#...
+            .#........
+            .........#
+            ..........
+            .......#..
+            #...#.....
         """.trimIndent()
             .lines()
+        val multiplier = 10L
 
-        assertEquals(41, part2(input))
+        assertEquals(1030, part2(input, multiplier))
     }
 }
