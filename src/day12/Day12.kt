@@ -45,13 +45,13 @@ data class SpringRow(val condition: String, val groupSizes: List<Int>) {
         return result
     }
 
-    fun places(size: Int) : List<String> {
+    fun places(size: Int) : List<Pair<String, String>> {
         val positions = placeIndexes(size)
         val result = positions.map {
             val left = this.condition.substring(0, it)
-            val middle = ".${"g".repeat(size)}."
-            val right = this.condition.substring(it + size + 2, this.condition.length)
-            "$left$middle$right"
+            val middle = ".${"g".repeat(size)}"
+            val right = "." + this.condition.substring(it + size + 2, this.condition.length)
+            "$left$middle" to right
         }
         return result
     }
@@ -62,8 +62,8 @@ data class SpringRow(val condition: String, val groupSizes: List<Int>) {
         } else {
             val curr = this.groupSizes[0]
             val rest = this.groupSizes.drop(1)
-            val result = places(curr).flatMap {
-                SpringRow(it, rest).combos()
+            val result = places(curr).flatMap { (l, r) ->
+                SpringRow(r, rest).combos().map { "$l$it" }
             }.toSet()
             result
         }
@@ -72,7 +72,7 @@ data class SpringRow(val condition: String, val groupSizes: List<Int>) {
 
         fun parse(line: String): SpringRow {
             val (c, l) = line.split(" ")
-            return SpringRow(".$c.", l.split(",").map { it.toInt() }.sortedDescending())
+            return SpringRow(".$c.", l.split(",").map { it.toInt() })
         }
 
     }
