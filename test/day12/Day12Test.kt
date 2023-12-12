@@ -6,12 +6,58 @@ import kotlin.test.assertEquals
 class Day12Test {
 
     @Test
+    fun testPart1_1() {
+        val input = "#.#.### 1,1,3"
+
+        val row = SpringRow.parse(input)
+        val result = row.combos()
+
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testPart1_2() {
+        val input = "???.### 1,1,3"
+
+        val row = SpringRow.parse(input)
+        val result = row.combos()
+
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    fun testPart1_3() {
+        val input = ".??..??...?##. 1,1,3"
+
+        val row = SpringRow.parse(input)
+        val result = row.combos()
+
+        assertEquals(4, result.size)
+    }
+
+    @Test
+    fun testPart1_4() {
+        val input = "?#?#?#?#?#?#?#? 1,3,1,6"
+
+        val row = SpringRow.parse(input)
+        val result = row.combos()
+
+        assertEquals(1, result.size)
+    }
+
+    @Test
     fun testPart1() {
         val input = """
+            ???.### 1,1,3
+            .??..??...?##. 1,1,3
+            ?#?#?#?#?#?#?#? 1,3,1,6
+            ????.#...#... 4,1,1
+            ????.######..#####. 1,6,5
+            ?###???????? 3,2,1
         """.trimIndent()
             .lines()
 
-        assertEquals(374, part1(input))
+        assertEquals(21, part1(input))
     }
 
     @Test
