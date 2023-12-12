@@ -49,7 +49,7 @@ data class SpringRow(val condition: String, val groupSizes: List<Int>) {
         val positions = placeIndexes(size)
         val result = positions.map {
             val left = this.condition.substring(0, it)
-            val middle = ".${"g".repeat(size)}"
+            val middle = ".${"#".repeat(size)}"
             val right = "." + this.condition.substring(it + size + 2, this.condition.length)
             "$left$middle" to right
         }
@@ -63,9 +63,9 @@ data class SpringRow(val condition: String, val groupSizes: List<Int>) {
             val curr = this.groupSizes[0]
             val rest = this.groupSizes.drop(1)
             val result = places(curr).flatMap { (l, r) ->
-                SpringRow(r, rest).combos().map { "$l$it" }
+                SpringRow(r, rest).combos().map { "$l$it".replace("?", ".") }
             }.toSet()
-            result
+            result.filter { it.count { c -> c == '#' } == groupSizes.sum() }.toSet()
         }
 
     companion object {
@@ -80,6 +80,12 @@ data class SpringRow(val condition: String, val groupSizes: List<Int>) {
 
 fun part1(input: List<String>): Int {
     return input.map { SpringRow.parse(it) }
+        .map {
+            println("$it -> " +
+                    "\n${it.condition}" +
+                    "\n${it.combos().joinToString("\n")}\n")
+            it
+        }
         .sumOf { it.combos().size }
 }
 
