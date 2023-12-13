@@ -144,3 +144,8 @@ fun Pair<Int, Int>.addVec(vec: Pair<Int, Int>): Pair<Int, Int> {
 fun Pair<Int, Int>.subtract(other: Pair<Int, Int>): Pair<Int, Int> {
     return this.first - other.first to this.second - other.second
 }
+
+fun String.hamming(other: String): Int {
+    check(this.length == other.length)
+    return other.indices.count { this[it] != other[it] }
+}
