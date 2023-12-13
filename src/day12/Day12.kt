@@ -1,94 +1,124 @@
 package day12
 
 import readResourceAsBufferedReader
+import kotlin.math.min
 
 
 fun main() {
     println("part 1: ${part1(readResourceAsBufferedReader("12_1.txt").readLines())}")
-    //println("part 2: ${part2(readResourceAsBufferedReader("12_1.txt").readLines())}")
+    println("part 2: ${part2(readResourceAsBufferedReader("12_1.txt").readLines())}")
 }
 
-val terminalChars = setOf('.','?')
+fun parse(line: String): Pair<String, List<Int>> {
+    val (c, l) = line.split(" ")
+    return Pair(c, l.split(",").map { it.toInt() })
+}
 
-data class SpringRow(val condition: String, val groupSizes: List<Int>) {
+fun parse2(line: String): Pair<String, List<Int>> {
+    val (c, l) = line.split(" ")
+    val condition = (0 until 5).joinToString("?") { c }
+    val numbers = (0 until 5).joinToString(",") { l }.split(",").map { it.toInt() }
+    return Pair(condition, numbers)
+}
 
-    fun placeIndexes(size: Int): List<Int> {
-        if (size + 2 > condition.length) {
+fun springCombinations(condition: String, groupSizes: List<Int>): Long {
+    return springCombinations(condition, groupSizes, 0, 0)
+}
+
+fun springCombinations(condition: String, groupSizes: List<Int>, conditionIdx: Int, groupIndex: Int): Long {
+    // we have no where left to place springs
+    if (conditionIdx > condition.lastIndex) {
+        // if we have springs left, this placement is invalid
+        return if (groupIndex <= groupSizes.lastIndex) {
+            0
+        } else {
+            1
+        }
+    }
+    // placing MUST cover the first broken spring
+    val firstBrokenSpring = condition.indexOf('#', conditionIdx)
+
+    // we placed all groups
+    if (groupIndex > groupSizes.lastIndex) {
+        // make sure we have covered all springs
+        return if (firstBrokenSpring == -1) {
+            1
+        } else {
+            0
+        }
+    }
+
+    val currGroup = groupSizes[groupIndex]
+
+    // invariant - first index is always valid
+    fun placeIndexes(): List<Int> {
+        // if the group is larger than the remaining space we can't place it
+        if (conditionIdx + currGroup > condition.length) {
             return emptyList()
         }
+
         val result = mutableListOf<Int>()
-        val window = (0 until size + 1).map { condition[it] }.groupBy { it }
+        val window = (conditionIdx until conditionIdx + currGroup).map { condition[it] }.groupBy { it }
             .mapValues { it.value.size }
             .toMutableMap()
 
-        for (r in size + 1 until condition.length) {
-            val left = r - size - 1
-            val rChar = condition[r]
-            val lChar = condition[left]
-            var dotCount = 0
-            if (lChar == '.') {
-                dotCount++
-            }
-            if (terminalChars.contains(lChar) && terminalChars.contains(rChar) && window['.'] == dotCount
-                && window.getOrDefault('g', 0) == 0) {
-                result.add(left)
-            }
-            window.computeIfPresent(lChar) { _, v -> v - 1}
-            window.compute(rChar) { k, v ->
-                if (v != null) {
-                    v + 1
+        val end = if (firstBrokenSpring != -1) {
+            min(firstBrokenSpring + currGroup, condition.length)
+        } else {
+            condition.length
+        }
+
+        for (r in conditionIdx + currGroup .. end) {
+            val l = r - currGroup
+
+            if(window.getOrDefault('.', 0) == 0) {
+                // check left buffer
+                val lbuffer = if (l > conditionIdx) {
+                    condition[l - 1] == '.' || condition[l - 1] == '?'
                 } else {
-                    1
+                    true
+                }
+                // check right buffer
+                val rbuffer = if (r < condition.length) {
+                    condition[r] == '.' || condition[r] == '?'
+                } else {
+                    true
+                }
+                if (lbuffer && rbuffer) {
+                    result.add(r + 1)
                 }
             }
+
+            window.computeIfPresent(condition[l]) { _, v -> v - 1}
+            if (r < condition.length) {
+                window.compute(condition[r]) { k, v ->
+                    if (v != null) {
+                        v + 1
+                    } else {
+                        1
+                    }
+                }
+
+            }
         }
         return result
     }
 
-    fun places(size: Int) : List<Pair<String, String>> {
-        val positions = placeIndexes(size)
-        val result = positions.map {
-            val left = this.condition.substring(0, it)
-            val middle = ".${"#".repeat(size)}"
-            val right = "." + this.condition.substring(it + size + 2, this.condition.length)
-            "$left$middle" to right
-        }
-        return result
+    val results = placeIndexes().map { rIndex ->
+        springCombinations(condition, groupSizes, rIndex, groupIndex + 1)
     }
 
-    fun combos() : Set<String> =
-        if (this.groupSizes.isEmpty()) {
-           setOf(this.condition)
-        } else {
-            val curr = this.groupSizes[0]
-            val rest = this.groupSizes.drop(1)
-            val result = places(curr).flatMap { (l, r) ->
-                SpringRow(r, rest).combos().map { "$l$it".replace("?", ".") }
-            }.toSet()
-            result.filter { it.count { c -> c == '#' } == groupSizes.sum() }.toSet()
-        }
-
-    companion object {
-
-        fun parse(line: String): SpringRow {
-            val (c, l) = line.split(" ")
-            return SpringRow(".$c.", l.split(",").map { it.toInt() })
-        }
-
-    }
+    return results.sum()
 }
 
-fun part1(input: List<String>): Int {
-    return input.map { SpringRow.parse(it) }
-        .map {
-            println("$it -> " +
-                    "\n${it.condition}" +
-                    "\n${it.combos().joinToString("\n")}\n")
-            it
-        }
-        .sumOf { it.combos().size }
+fun part1(input: List<String>): Long {
+    val rows = input.map { parse(it) }
+    val sums = rows.map { springCombinations(it.first, it.second) }
+    return sums.sum()
 }
 
-fun part2(input: List<String>): Int {
-    return 0
+fun part2(input: List<String>): Long {
+    val rows = input.map { parse2(it) }
+    val sums = rows.map { springCombinations(it.first, it.second) }
+    return sums.sum()
 }
