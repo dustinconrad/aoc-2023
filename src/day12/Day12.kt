@@ -22,10 +22,11 @@ fun parse2(line: String): Pair<String, List<Int>> {
 }
 
 fun springCombinations(condition: String, groupSizes: List<Int>): Long {
-    return springCombinations(condition, groupSizes, 0, 0)
+    val cache = Array(condition.length) { LongArray(groupSizes.size) { -1L } }
+    return springCombinations(cache, condition, groupSizes, 0, 0)
 }
 
-fun springCombinations(condition: String, groupSizes: List<Int>, conditionIdx: Int, groupIndex: Int): Long {
+fun springCombinations(cache: Array<LongArray>, condition: String, groupSizes: List<Int>, conditionIdx: Int, groupIndex: Int): Long {
     // we have no where left to place springs
     if (conditionIdx > condition.lastIndex) {
         // if we have springs left, this placement is invalid
@@ -46,6 +47,10 @@ fun springCombinations(condition: String, groupSizes: List<Int>, conditionIdx: I
         } else {
             0
         }
+    }
+
+    if (cache[conditionIdx][groupIndex] != -1L) {
+        return cache[conditionIdx][groupIndex]
     }
 
     val currGroup = groupSizes[groupIndex]
@@ -105,10 +110,12 @@ fun springCombinations(condition: String, groupSizes: List<Int>, conditionIdx: I
     }
 
     val results = placeIndexes().map { rIndex ->
-        springCombinations(condition, groupSizes, rIndex, groupIndex + 1)
+        springCombinations(cache, condition, groupSizes, rIndex, groupIndex + 1)
     }
 
-    return results.sum()
+    val sum = results.sum()
+    cache[conditionIdx][groupIndex] = sum
+    return sum
 }
 
 fun part1(input: List<String>): Long {
