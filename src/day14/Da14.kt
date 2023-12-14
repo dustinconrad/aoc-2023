@@ -8,46 +8,78 @@ fun main() {
     println("part 2: ${part2(readResourceAsBufferedReader("14_1.txt").readLines())}")
 }
 
-data class Dish(val grid: List<String>) {
+class Dish(grid: List<String>) {
 
-    val columns = grid[0].indices.map { idx -> grid.map { it[idx] }.joinToString("") }
+    val height = grid.size
 
-    fun tiltPart1(): Map<Pair<Int, Int>, List<Pair<Int, Int>>> {
-        val result = mutableMapOf<Pair<Int, Int>, MutableList<Pair<Int, Int>>>()
-        for (col in columns.withIndex()) {
-            var lastRectangle = -1
-            for (y in columns.indices) {
-                when (col.value[y]) {
-                    '#' -> lastRectangle = y
-                    'O' -> {
-                        result.compute(lastRectangle to col.index) { k, v ->
-                            if (v == null) {
-                                mutableListOf(lastRectangle + 1 to col.index)
-                            } else {
-                                v.add(lastRectangle + v.size to col.index)
-                                v
-                            }
-                        }
-                    }
+    val width = grid[0].length
+
+    val rectangles = grid.flatMapIndexed { y, line -> line.mapIndexedNotNull{ x, c ->
+        if(line[x] == '#') {
+            y to x
+        } else {
+            null
+        }
+    } }
+
+    val rectanglesByRow = rectangles.groupBy { it.first }
+        .mapValues { (k, v) -> v.sortedBy { it.second } }
+
+    val rectanglesByColumn = rectangles.groupBy { it.second }
+        .mapValues { (k, v) -> v.sortedBy { it.first } }
+
+    // simulate horizontal tilt
+    private var roundStones: Map<Int, List<Pair<Int, Int>>> = grid.flatMapIndexed { y, line -> line.mapIndexedNotNull{ x, c ->
+        if(line[x] == 'O') {
+            y to x
+        } else {
+            null
+        }
+    } }.groupBy { it.first }
+
+    fun tiltNorth() {
+        roundsByColumn()
+        // each column
+        roundStones = roundStones.map { (col, orderedRounds) ->
+            val rectangles = rectanglesByColumn[col]!!
+            val colResult = mutableListOf<Pair<Int,Int>>()
+
+            var roundsPtr = 0
+            var recPtr = 0
+            var lastObstruction = -1
+            while (roundsPtr <= orderedRounds.lastIndex) {
+                val roundsHead = orderedRounds[roundsPtr]
+                if (recPtr > rectangles.lastIndex || roundsHead.first < rectangles[recPtr].first) {
+                    val movedStone = lastObstruction + 1 to col
+                    colResult.add(movedStone)
+                    lastObstruction = movedStone.first
+                    roundsPtr++
+                } else {
+                    lastObstruction = rectangles[recPtr].first
+                    recPtr++
                 }
             }
-        }
-        return result
+            col to colResult
+        }.toMap()
     }
 
-    fun part1(): Int {
-        val part1Result = tiltPart1()
-        return part1Result.map { (anchor, stones) ->
-            val count = stones.count()
-            val max = grid.size - (anchor.first + 1)
-            (0 until count).sumOf { max - it }
-        }.sum()
+    private fun roundsByColumn() {
+        roundStones = roundStones.values.flatten().groupBy { it.second }
+            .mapValues { it.value.sortedBy { it.first } }
+    }
+
+    fun loadNorth(): Int {
+        roundsByColumn()
+        return roundStones.values.sumOf { stones ->
+            stones.sumOf { height - it.first }
+        }
     }
 }
 
 fun part1(input: List<String>): Int {
     val dish = Dish(input)
-    return dish.part1()
+    dish.tiltNorth()
+    return dish.loadNorth()
 }
 
 fun part2(input: List<String>): Int {
