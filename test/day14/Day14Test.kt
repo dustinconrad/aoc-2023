@@ -6,20 +6,35 @@ import kotlin.test.assertEquals
 class Day14Test {
 
     @Test
-    fun testPart1() {
-        val input = """
-        """.trimIndent()
-            .lines()
-
-        assertEquals(142, part1(input))
-    }
-
-    @Test
     fun testPart2() {
         val input = """
+            O....#....
+            O.OO#....#
+            .....##...
+            OO.#O....O
+            .O.....O#.
+            O.#..O.#.#
+            ..O..#O..O
+            .......O..
+            #....###..
+            #OO..#....
         """.trimIndent()
             .lines()
 
-        assertEquals(281, part2(input))
+        val dish = Dish(input)
+        dish.cycle()
+        assertEquals("""
+            .....#....
+            ....#...O#
+            ...OO##...
+            .OO#......
+            .....OOO#.
+            .O#...O#.#
+            ....O#....
+            ......OOOO
+            #...O###..
+            #..OO#....
+        """.trimIndent(),
+            dish.toString())
     }
 }
