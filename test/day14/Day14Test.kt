@@ -20,21 +20,6 @@ class Day14Test {
             #OO..#....
         """.trimIndent()
             .lines()
-
-        val dish = Dish(input)
-        dish.cycle()
-        assertEquals("""
-            .....#....
-            ....#...O#
-            ...OO##...
-            .OO#......
-            .....OOO#.
-            .O#...O#.#
-            ....O#....
-            ......OOOO
-            #...O###..
-            #..OO#....
-        """.trimIndent(),
-            dish.toString())
+        assertEquals(64, part2(input))
     }
 }

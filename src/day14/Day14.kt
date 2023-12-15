@@ -210,19 +210,16 @@ fun part2(input: List<String>): Int {
             seen[state] = step++
         }
     }
-    val cycleStart = seen[cycleState]
+    val cycleStart = seen[cycleState]!!
     val cycleLength = step - cycleStart!!
+    val cycle = seen.map { it.value to it.key }
+        .filter { cycleStart <= it.first && it.first < step }
+        .map { it.first - cycleStart to it.second }
+        .toMap()
 
-    val seq = states.take(200).toList()
+    val cycleStep = (1000000000 - cycleStart) % cycleLength
+    val endState = cycle[cycleStep]!!
 
-    val se = seq[85] == seq[112]
-    val se2 = seq[86] == seq[113]
-    val se3 = seq[87] == seq[114]
-    val se4 = seq[88] == seq[115]
-
-    val se5 = seq[112] == seq[112 + 27]
-
-    val se6 = seq[112] == seq[112 + 27 + 27]
-
-    return 0
+    val end = Dish(endState.split("\n"))
+    return end.loadNorth()
 }
