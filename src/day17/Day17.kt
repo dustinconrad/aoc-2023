@@ -8,6 +8,10 @@ fun main() {
     println("part 2: ${part2(readResourceAsBufferedReader("17_1.txt").readLines())}")
 }
 
+//fun notTooStraightPath(input: List<String>): Int {
+//    val dp = Array<Array<Map<Pair<Int,Int>,List<Int>>>>(input.size) { Array(input[0].length) { mutableMapOf() } }
+//}
+
 fun part1(input: List<String>): Int {
     return 0
 }

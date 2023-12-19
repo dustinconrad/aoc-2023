@@ -1,45 +1,87 @@
 package day16
 
+import addVec
 import readResourceAsBufferedReader
 
 
 fun main() {
     println("part 1: ${part1(readResourceAsBufferedReader("16_1.txt").readLines())}")
-    println("part 2: ${part2(readResourceAsBufferedReader("16_1.txt").readLines())}")
+    //println("part 2: ${part2(readResourceAsBufferedReader("16_1.txt").readLines())}")
 }
 
 fun part1(input: List<String>): Int {
-    return 0
+    val lp = LightPath(input)
+    val result = lp.part1()
+    return result.size
 }
 
 fun part2(input: List<String>): Int {
     return 0
 }
 
+typealias Pos = Pair<Int, Int>
+typealias Vec = Pair<Int, Int>
+
 data class LightPath(val grid: List<String>) {
 
-    fun path(): List<Pair<Int,Int>> {
-        var curr = 0 to 0
-        var currVec = 0 to 1
+    private val height = grid.size
+    private val width = grid[0].length
 
-        val result = mutableListOf<Pair<Int,Int>>()
+    fun path(): Set<Pair<Pos,Vec>> {
+        val result = mutableSetOf<Pair<Pos,Vec>>()
 
-        while (true) {
+        val q = ArrayDeque<Pair<Pos,Vec>>()
+        q.add((0 to 0) to (0 to 1))
+
+        while (q.isNotEmpty()) {
+            val curr = q.removeFirst()
             result.add(curr)
 
+            val next = next(curr)
+
+            q.addAll(0, next.filter { !result.contains(it) })
         }
 
+        return result
     }
 
-//    fun nextVec(curr: Pair<Int, Int>, currVec: Pair<Int,Int>): List<Pair<Int,Int>> {
-//        val tile = grid[curr.first][curr.second]
-//        val (cy, cx) = currVec
-//        return when {
-//            tile == '/' -> listOf(-cx to -cy)
-//            tile == '\\' -> listOf(cy to cx)
-//            cy != 0 && tile == '-' ->
-//        }
-//    }
+    fun part1(): Set<Pos> {
+        val paths = path()
+        val tiles = paths.map { it.first }.toSet()
+
+        return tiles
+    }
+
+    fun next(curr: Pair<Pos,Vec>): List<Pair<Pos,Vec>> {
+        val (pos, vec) = curr
+        val tile = grid[pos.first][pos.second]
+        val (cy, cx) = vec
+        val nextVecs = when {
+            tile == '/' -> listOf(-cx to -cy)
+            tile == '\\' -> listOf(cx to cy)
+            cy != 0 && tile == '-' -> listOf(0 to 1, 0 to -1)
+            cx != 0 && tile == '|' -> listOf(1 to 0, -1 to 0)
+            else -> listOf(vec)
+        }
+
+        val result = nextVecs.map { pos.addVec(it) to it }
+            .filter { (pos, _) -> pos.first in 0 until height && pos.second in 0 until width }
+
+        return result
+    }
+
+    fun debugPart1(): String {
+        val tiles = part1()
+        return (0 until height).map { y ->
+            (0 until width).map { x ->
+                if (tiles.contains(y to x)) {
+                    "#"
+                } else {
+                    "."
+                }
+            }.joinToString("")
+        }.joinToString("\n")
+    }
 
 }
 

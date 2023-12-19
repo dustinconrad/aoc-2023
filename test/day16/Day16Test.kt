@@ -8,10 +8,20 @@ class Day16Test {
     @Test
     fun testPart1() {
         val input = """
+            .|...\....
+            |.-.\.....
+            .....|-...
+            ........|.
+            ..........
+            .........\
+            ..../.\\..
+            .-.-/..|..
+            .|....-|.\
+            ..//.|....
         """.trimIndent()
             .lines()
 
-        assertEquals(142, part1(input))
+        assertEquals(46, part1(input))
     }
 
     @Test
