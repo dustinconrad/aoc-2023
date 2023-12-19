@@ -6,7 +6,7 @@ import readResourceAsBufferedReader
 
 fun main() {
     println("part 1: ${part1(readResourceAsBufferedReader("16_1.txt").readLines())}")
-    //println("part 2: ${part2(readResourceAsBufferedReader("16_1.txt").readLines())}")
+    println("part 2: ${part2(readResourceAsBufferedReader("16_1.txt").readLines())}")
 }
 
 fun part1(input: List<String>): Int {
@@ -16,7 +16,8 @@ fun part1(input: List<String>): Int {
 }
 
 fun part2(input: List<String>): Int {
-    return 0
+    val lp = LightPath(input)
+    return lp.part2()
 }
 
 typealias Pos = Pair<Int, Int>
@@ -27,11 +28,11 @@ data class LightPath(val grid: List<String>) {
     private val height = grid.size
     private val width = grid[0].length
 
-    fun path(): Set<Pair<Pos,Vec>> {
+    fun path(start: Pair<Pos,Vec> = (0 to 0) to (0 to 1) ): Set<Pair<Pos,Vec>> {
         val result = mutableSetOf<Pair<Pos,Vec>>()
 
         val q = ArrayDeque<Pair<Pos,Vec>>()
-        q.add((0 to 0) to (0 to 1))
+        q.add(start)
 
         while (q.isNotEmpty()) {
             val curr = q.removeFirst()
@@ -50,6 +51,17 @@ data class LightPath(val grid: List<String>) {
         val tiles = paths.map { it.first }.toSet()
 
         return tiles
+    }
+
+    fun part2(): Int {
+        val top = (0 until width).map { (0 to it) to (1 to 0) }
+        val bottom = (0 until width).map { (height - 1 to it) to (-1 to 0) }
+        val left = (0 until height).map { (it to 0) to (0 to 1) }
+        val right = (0 until height).map { (it to width - 1) to (0 to -1) }
+
+        val all = top + bottom + left + right
+
+        return all.maxOf { path(it).map { it.first }.toSet().size }
     }
 
     fun next(curr: Pair<Pos,Vec>): List<Pair<Pos,Vec>> {
