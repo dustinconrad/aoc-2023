@@ -1,5 +1,7 @@
 package day16
 
+import Pos
+import Vec
 import addVec
 import readResourceAsBufferedReader
 
@@ -19,9 +21,6 @@ fun part2(input: List<String>): Int {
     val lp = LightPath(input)
     return lp.part2()
 }
-
-typealias Pos = Pair<Int, Int>
-typealias Vec = Pair<Int, Int>
 
 data class LightPath(val grid: List<String>) {
 

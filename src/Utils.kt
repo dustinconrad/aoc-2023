@@ -130,6 +130,9 @@ fun extendedEuclidean(a: Long, b: Long): ExtendedEuclidianResult {
     )
 }
 
+typealias Pos = Pair<Int, Int>
+typealias Vec = Pair<Int, Int>
+
 fun lcm(vararg numbers: Long): Long {
     val (a, b) = numbers
     val gcd = extendedEuclidean(a, b).gcd
