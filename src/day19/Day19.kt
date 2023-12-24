@@ -26,31 +26,6 @@ fun part2(input: List<String>): Int {
 
 val NULL_LABEL = UUID.randomUUID().toString()
 
-data class Part(val x: Long, val m: Long, val a: Long, val s: Long) {
-
-    fun getByCategory(category: String): Long {
-        return when(category) {
-            "x" -> x
-            "m" -> m
-            "a" -> a
-            "s" -> s
-            else -> throw IllegalArgumentException("Unknown category: $category")
-        }
-    }
-
-    val part1 = x + m + a + s
-
-    companion object {
-
-        val p = Regex("""\{x=(\d+),m=(\d+),a=(\d+),s=(\d+)}""")
-
-        fun parse(line: String): Part {
-            val (_, x, m, a, s) = p.matchEntire(line)!!.groupValues
-            return Part(x.toLong(), m.toLong(), a.toLong(), s.toLong())
-        }
-    }
-}
-
 data class Part2(val x: LongRange, val m: LongRange, val a: LongRange, val s: LongRange) {
 
     fun getByCategory(category: String): LongRange {
@@ -81,6 +56,8 @@ data class Part2(val x: LongRange, val m: LongRange, val a: LongRange, val s: Lo
         }
     }
 
+    val isValid = !x.isEmpty() && !m.isEmpty() && !a.isEmpty() && !s.isEmpty()
+
     companion object {
 
         val p = Regex("""\{x=(\d+),m=(\d+),a=(\d+),s=(\d+)}""")
@@ -110,7 +87,7 @@ data class Workflow(val label: String, val rules: List<Rule>) {
                 }
             }
             acc
-        }
+        }.mapValues { (k, v) -> v.filter { it.isValid } }
     }
 
     companion object {
