@@ -20,8 +20,15 @@ fun part1(input: List<String>): Long {
     return factory.part1()
 }
 
-fun part2(input: List<String>): Int {
-    return 0
+fun part2(input: List<String>): Long {
+    val (workflows, p) = input.byEmptyLines()
+    val factory = Factory.parse(workflows.lines())
+
+    val part = Part2(1L .. 4000, 1L .. 4000, 1L .. 4000, 1L .. 4000)
+
+    factory.execute(part)
+
+    return factory.part2()
 }
 
 val NULL_LABEL = UUID.randomUUID().toString()
@@ -44,6 +51,10 @@ data class Part2(val x: LongRange, val m: LongRange, val a: LongRange, val s: Lo
         val aSum = a.sumOf { it * x.count() * m.count() * s.count() }
         val sSum = s.sumOf { it * x.count() * m.count() * a.count() }
         return xSum + mSum + aSum + sSum
+    }
+
+    fun combinations(): Long {
+        return x.count().toLong() * m.count() * a.count() * s.count()
     }
 
     fun copyBut(category: String, newRange: LongRange): Part2 {
@@ -110,6 +121,10 @@ class Factory(private val workflows: Map<String, Workflow>) {
 
     fun part1(): Long {
         return accepted.sumOf { it.rating() }
+    }
+
+    fun part2(): Long {
+        return accepted.sumOf { it.combinations() }
     }
 
     fun execute(part: Part2) {
