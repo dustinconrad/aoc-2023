@@ -6,7 +6,7 @@ import kotlin.reflect.KClass
 
 fun main() {
     println("part 1: ${part1(readResourceAsBufferedReader("20_1.txt").readLines())}")
-    //println("part 2: ${part2(readResourceAsBufferedReader("20_1.txt").readLines())}")
+    println("part 2: ${part2(readResourceAsBufferedReader("20_1.txt").readLines())}")
 }
 
 fun part1(input: List<String>): Long {
@@ -18,7 +18,12 @@ fun part1(input: List<String>): Long {
 }
 
 fun part2(input: List<String>): Int {
-    return 0
+    val propagator = Propagator.create(input)
+    var counter = 1
+    while(!propagator.pressButton2{ !it.isHigh && it.dest == "rx" }) {
+        counter++
+    }
+    return counter
 }
 
 const val BUTTON = "Button"
@@ -137,6 +142,22 @@ class Propagator(private val modules: Map<String, Module>) {
         val high = signals.count { it.isHigh }
 
         return low.toLong() * high
+    }
+
+    fun pressButton2(target: (Signal) -> Boolean): Boolean {
+        val q = ArrayDeque<Signal>()
+        val button = modules[BUTTON]!!
+        q.addAll(button.execute(Signal(true, "a", BUTTON)))
+        while (q.isNotEmpty()) {
+            val currSignal = q.removeFirst()
+            if (target.invoke(currSignal)) {
+                return true
+            } else {
+                val destModule = modules[currSignal.dest] ?: Module.OutputModule
+                q.addAll(destModule.execute(currSignal))
+            }
+        }
+        return false
     }
 
     companion object {
