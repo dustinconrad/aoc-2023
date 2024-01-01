@@ -156,3 +156,7 @@ fun String.hamming(other: String): Int {
     check(this.length == other.length)
     return other.indices.count { this[it] != other[it] }
 }
+
+typealias Coord2 = Pair<Int,Int>
+
+typealias Coord3 = Triple<Int,Int,Int>

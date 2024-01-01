@@ -1,5 +1,6 @@
 package day03
 
+import Coord2
 import overlaps
 import readResourceAsBufferedReader
 import kotlin.math.max
@@ -10,8 +11,6 @@ fun main() {
     println("part 1: ${part1(readResourceAsBufferedReader("3_1.txt").readLines())}")
     println("part 2: ${part2(readResourceAsBufferedReader("3_1.txt").readLines())}")
 }
-
-typealias Coord2 = Pair<Int,Int>
 
 typealias PartCoord = Pair<Int, IntRange>
 
